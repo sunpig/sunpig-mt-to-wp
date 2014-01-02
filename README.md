@@ -57,3 +57,21 @@ guidelines and practices for hardening an installation. It's "the standard" thes
 general preference for "off-piste" solutions, but sometimes I just want to go with something that
 "just works". Mostly.
 
+
+## Factors to consider
+
+I'd prefer as little downtime as possible, but I can live with a few hours. That means I don't have to
+script the migration in quite so much detail.
+
+We have never used the asset management features of MT very much, which means that pretty much all of
+our data is stored in the database - we don't have to worry about uploaded assets and linkages between
+the db and the file system.
+
+Maintaining permalinks for individual posts is a must-have. Maintaining permalinks for comments on entries
+is a nice-to-have.
+
+We only have a few blogs (5) and a few registered authors (4), because we never made much use of MT's
+user registration system. With these numbers, it's simple enough to manually create the matching blogs
+and users in WP, and then copy data across to them. If we had more registered users, I'd probably
+want to script their creation, and spend a lot more time matching up users and entries.
+
