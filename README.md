@@ -19,9 +19,10 @@ The goal is to move these blogs to self-hosted Wordpress 3.8 on the same server.
 Reasons for the migration:
 
 First of all, Movable Type fails two of my three tests for choosing a piece of (open source) software:
-	* Is it well documented? (yes)
-	* Is it under active development (no, at least not in its open source version)
-	* Does it have an active and supportive user community (not any more)
+
+* Is it well documented? (yes)
+* Is it under active development (no, at least not in its open source version)
+* Does it have an active and supportive user community (not any more)
 
 I still like its architectural model of static publishing, and (partly because of that) it has
 a great security record, which is important if you're running your own server. I've been using MT
