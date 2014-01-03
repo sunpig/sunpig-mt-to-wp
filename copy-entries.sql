@@ -36,7 +36,7 @@ BEGIN
 		') ',
 		' SELECT ',
 			'entry_id, ',
-			'entry_author_id, ',
+			'wp_users.id, ',
 			'entry_created_on, ',
 			'CONVERT_TZ(entry_created_on,\'+00:00\',\'-06:00\'),',
 			'CAST( ',
@@ -63,7 +63,10 @@ BEGIN
 			'CONCAT(\'http://sunpig.com/mt-entry-\', entry_id, \'.html\'), ',
 			'0, ',
 			'\'post\' ',
-		' FROM mt_entry WHERE entry_blog_id = ', mt_blog_id);
+		' FROM mt_entry ',
+		' INNER JOIN mt_author ON mt_entry.entry_author_id = mt_author.author_id ',
+		' INNER JOIN wp_users ON mt_author.author_email = wp_users.user_email ',
+		' WHERE entry_blog_id = ', mt_blog_id, ' ORDER BY entry_id ASC');
 	PREPARE stmt_copy_entries FROM @str_copy_entries;
 	EXECUTE stmt_copy_entries;
 	DEALLOCATE PREPARE stmt_copy_entries;

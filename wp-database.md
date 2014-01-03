@@ -41,5 +41,5 @@ are represented as *rows* of data in `wp_postmeta`. (Each row in `wp_postmeta` r
 a piece of data about a single post. Similarly for comments.)
 
 So copying entry/post data from MT tables into the WP tables isn't simply a matter of
-doing a single INSERT...SELECT query. Hello cursors.
+doing a single INSERT...SELECT query. Hello cursors?
 
