@@ -83,3 +83,6 @@ I don't care whether posts appear as duplicates in RSS readers after the migrati
 can just make sure that the GUID for each post in the wp_posts table is unique, but it doesn't have to
 match anything in the old system.
 
+The charset the mt_* tables in our database use is `latin1`. The wp_* tables use a utf8 charset.
+[Balls](http://codex.wordpress.org/Converting_Database_Character_Sets).
+
