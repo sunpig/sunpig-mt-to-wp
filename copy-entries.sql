@@ -4,13 +4,15 @@ DROP PROCEDURE IF EXISTS copy_mt_entries_to_wp_posts //
 
 CREATE PROCEDURE copy_mt_entries_to_wp_posts(mt_blog_id INT, wp_blog_id INT)
 BEGIN
-	SET @str_truncate_wp_table = CONCAT('TRUNCATE TABLE wp_', wp_blog_id, '_posts'); 
+	SET @wp_table_infix = if(wp_blog_id = 1, '', CONCAT(wp_blog_id, '_'));
+
+	SET @str_truncate_wp_table = CONCAT('TRUNCATE TABLE wp_', @wp_table_infix, 'posts'); 
 	PREPARE stmt_truncate_wp_table FROM @str_truncate_wp_table;
 	EXECUTE stmt_truncate_wp_table;
 	DEALLOCATE PREPARE stmt_truncate_wp_table;
 
 	SET @str_copy_entries = CONCAT(
-		'INSERT INTO wp_', wp_blog_id, '_posts (',
+		'INSERT INTO wp_', @wp_table_infix, 'posts (',
 			'id, ',
 			'post_author, ',
 			'post_date, ',
@@ -26,6 +28,7 @@ BEGIN
 			'pinged, ',
 			'post_modified, ',
 			'post_modified_gmt, ',
+			'post_content_filtered, ',
 			'post_parent, ',
 			'guid, ',
 			'menu_order, ',
@@ -51,6 +54,7 @@ BEGIN
 			'\'\', ',
 			'entry_modified_on, ',
 			'CONVERT_TZ(entry_modified_on,\'+00:00\',\'-06:00\'), ',
+			'\'\', ',
 			'0, ',
 			'CONCAT(\'http://sunpig.com/mt-entry-\', entry_id, \'.html\'), ',
 			'0, ',
