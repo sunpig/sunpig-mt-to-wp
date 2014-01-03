@@ -1,8 +1,8 @@
 delimiter //
 
-DROP PROCEDURE IF EXISTS copy_mt_categories_to_wp_terms //
+DROP PROCEDURE IF EXISTS copy_mt_categories_and_entry_tags_to_wp_terms //
 
-CREATE PROCEDURE copy_mt_categories_to_wp_terms(mt_blog_id INT, wp_blog_id INT)
+CREATE PROCEDURE copy_mt_categories_and_entry_tags_to_wp_terms(mt_blog_id INT, wp_blog_id INT)
 BEGIN
 	SET @wp_table_infix = if(wp_blog_id = 1, '', CONCAT(wp_blog_id, '_'));
 
@@ -48,13 +48,12 @@ BEGIN
 			'count',
 		') ',
 		' SELECT ',
-			'category_id, ',
+			'term_id, ',
 			'\'category\', ',
 			'\'\', ',
 			'0, '
 			'0 '
-		' FROM mt_category ',
-		' WHERE category_blog_id = ', mt_blog_id, ' ORDER BY category_id ASC');
+		' FROM wp_', @wp_table_infix, 'terms');
 	PREPARE stmt_create_term_taxonomy FROM @str_create_term_taxonomy;
 	EXECUTE stmt_create_term_taxonomy;
 	DEALLOCATE PREPARE stmt_create_term_taxonomy;
@@ -81,10 +80,81 @@ BEGIN
 	EXECUTE stmt_create_term_relationships;
 	DEALLOCATE PREPARE stmt_create_term_relationships;
 
+
+
+
+	SELECT @max_category_id := `max_category_id` FROM (select max(category_id) as max_category_id from mt_category) mtc;
+
+	SET @str_copy_entry_tags = CONCAT(
+		'INSERT INTO wp_', @wp_table_infix, 'terms (',
+			'term_id, ',
+			'name, ',
+			'slug, ',
+			'term_group ',
+		') ',
+		' select distinct ',
+			' mtt.tag_id + 1000 + ', @max_category_id, ', ',
+			' mtt.tag_name, ',
+			' if(mtt.tag_n8d_id = 0, mtt.tag_name, mtt2.tag_name), ',
+			' 0 ',
+		' from  ',
+			' mt_objecttag mto ',
+			' inner join mt_tag mtt on mto.objecttag_tag_id = mtt.tag_id ',
+			' left outer join mt_tag mtt2 on mtt.tag_n8d_id = mtt2.tag_id ',
+		' where ',
+			' mto.objecttag_blog_id = ', mt_blog_id,
+			' and mto.objecttag_object_datasource = \'entry\'',
+			' and if(mtt.tag_n8d_id = 0, mtt.tag_name, mtt2.tag_name) not in (select distinct slug from wp_', @wp_table_infix, 'terms)',
+		' order by mtt.tag_id ');
+	PREPARE stmt_copy_entry_tags FROM @str_copy_entry_tags;
+	EXECUTE stmt_copy_entry_tags;
+	DEALLOCATE PREPARE stmt_copy_entry_tags;
+
+	SET @str_create_entry_tags_term_taxonomy = CONCAT(
+		'INSERT INTO wp_', @wp_table_infix, 'term_taxonomy (',
+			'term_id, ',
+			'taxonomy, ',
+			'description, ',
+			'parent, ',
+			'count',
+		') ',
+		' SELECT ',
+			'term_id, ',
+			'\'post_tag\', ',
+			'\'\', ',
+			'0, '
+			'0 '
+		' FROM wp_', @wp_table_infix, 'terms',
+		' WHERE term_id > ', @max_category_id);
+	PREPARE stmt_create_entry_tags_term_taxonomy FROM @str_create_entry_tags_term_taxonomy;
+	EXECUTE stmt_create_entry_tags_term_taxonomy;
+	DEALLOCATE PREPARE stmt_create_entry_tags_term_taxonomy;
+
+	SET @str_create_entry_tags_term_relationships = CONCAT(
+		'INSERT INTO wp_', @wp_table_infix, 'term_relationships (',
+			'object_id, ',
+			'term_taxonomy_id, ',
+			'term_order ',
+		') ',
+
+		' select ',
+			' mt_objecttag.objecttag_object_id, ',
+			' wp_', @wp_table_infix, 'term_taxonomy.term_taxonomy_id, ',
+			' 1 ',
+		' from ',
+			' mt_objecttag ',
+			' inner join wp_', @wp_table_infix, 'term_taxonomy on mt_objecttag.objecttag_tag_id = wp_', @wp_table_infix, 'term_taxonomy.term_id - 1000 - ', @max_category_id, 
+		' where  ',
+			' mt_objecttag.objecttag_blog_id = ', mt_blog_id, ' and mt_objecttag.objecttag_object_datasource = \'entry\' ',
+			' and wp_', @wp_table_infix, 'term_taxonomy.taxonomy = \'post_tag\' ');
+	PREPARE stmt_create_entry_tags_term_relationships FROM @str_create_entry_tags_term_relationships;
+	EXECUTE stmt_create_entry_tags_term_relationships;
+	DEALLOCATE PREPARE stmt_create_entry_tags_term_relationships;
+
+
 	SET SQL_SAFE_UPDATES=0;
 
 	SET @str_update_counts = CONCAT(
-		'INSERT INTO wp_', @wp_table_infix, 'term_relationships (',
 		' update wp_', @wp_table_infix, 'term_taxonomy tt ',
 			' inner join ( ',
 				' select term_taxonomy_id, count(*) as c ',
@@ -98,6 +168,7 @@ BEGIN
 
 END
 //
+
 
 
 DROP PROCEDURE IF EXISTS copy_mt_entries_to_wp_posts //
