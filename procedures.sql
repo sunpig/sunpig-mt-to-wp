@@ -244,4 +244,57 @@ BEGIN
 END
 //
 
+
+DROP PROCEDURE IF EXISTS copy_mt_comments_to_wp_comments //
+
+CREATE PROCEDURE copy_mt_comments_to_wp_comments(mt_blog_id INT, wp_blog_id INT)
+BEGIN
+	SET @wp_table_infix = if(wp_blog_id = 1, '', CONCAT(wp_blog_id, '_'));
+
+	SET @str_truncate_wp_table = CONCAT('TRUNCATE TABLE wp_', @wp_table_infix, 'comments'); 
+	PREPARE stmt_truncate_wp_table FROM @str_truncate_wp_table;
+	EXECUTE stmt_truncate_wp_table;
+	DEALLOCATE PREPARE stmt_truncate_wp_table;
+
+	SET @str_copy_comments = CONCAT(
+		'INSERT INTO wp_', @wp_table_infix, 'comments (',
+			' comment_id, ',
+			' comment_post_id, ',
+			' comment_author, ',
+			' comment_author_email, ',
+			' comment_author_url, ',
+			' comment_author_IP, ',
+			' comment_date, ',
+			' comment_date_gmt, ',
+			' comment_content, ',
+			' comment_karma,  ',
+			' comment_approved, ',
+			' comment_parent, ',
+			' user_id ',
+		' ) ',
+		' SELECT ',
+			' comment_id, ',
+			' comment_entry_id, ',
+			' comment_author, ',
+			' comment_email, ',
+			' comment_url, ',
+			' comment_ip, ',
+			' comment_created_on, ',
+			' CONVERT_TZ(comment_created_on,\'+00:00\',\'-06:00\'), ',
+			' comment_text, ',
+			' 0, ',
+			' comment_visible, ',
+			' 0, ',
+			' 0 ',
+		' FROM ',
+			' mt_comment ',
+		' WHERE ',
+			' comment_blog_id = ', mt_blog_id, ' ORDER BY comment_id ASC');
+	PREPARE stmt_copy_comments FROM @str_copy_comments;
+	EXECUTE stmt_copy_comments;
+	DEALLOCATE PREPARE stmt_copy_comments;
+END
+//
+
+
 delimiter ;

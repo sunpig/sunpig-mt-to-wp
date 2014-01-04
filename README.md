@@ -86,3 +86,4 @@ match anything in the old system.
 The charset the mt_* tables in our database use is `latin1`. The wp_* tables use a utf8 charset.
 [Balls](http://codex.wordpress.org/Converting_Database_Character_Sets).
 
+I can cope with a small loss of fidelity in things like categories and tags.
