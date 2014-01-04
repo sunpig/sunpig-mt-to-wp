@@ -1,10 +1,10 @@
 /* 
-The quickreviews blog (mt_blog_id=12, wp blog id = ?) used an entry-keywords plugin for storing
+The quickreviews blog (mt_blog_id=12, wp blog id = 4) used an entry-keywords plugin for storing
 key-value data for an entry. In WP, this data is stored in the wp_postmeta table.
 There are only three keys: imdb, amazon, and image
 */
 
-insert into wp_?_postmeta (
+insert into wp_4_postmeta (
 	post_id,
 	meta_key,
 	meta_value
@@ -30,7 +30,7 @@ where
 	and entry_keywords like '%imdb=%';
 
 
-insert into wp_?_postmeta (
+insert into wp_4_postmeta (
 	post_id,
 	meta_key,
 	meta_value
@@ -56,7 +56,7 @@ where
 	and entry_keywords like '%amazon=%';
 
 
-insert into wp_?_postmeta (
+insert into wp_4_postmeta (
 	post_id,
 	meta_key,
 	meta_value
