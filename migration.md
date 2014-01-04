@@ -17,5 +17,5 @@ and "background-image" can be two separate tags in MT, but they end up with
 the same *normalized* (n8d) tagname of "backgroundimage".
 
 Also, it will drop tags that resolve to the same base name as an existing *category*.
-I can live with the loss.
+(I can live with the loss.)
 
