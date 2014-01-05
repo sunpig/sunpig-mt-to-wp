@@ -68,7 +68,7 @@ BEGIN
 		' select ',
 			' mt_placement.placement_entry_id, ',
 			' wp_', @wp_table_infix, 'term_taxonomy.term_taxonomy_id, ',
-			' 1 ',
+			' 0 ',
 		' from ',
 			' mt_placement ',
 			' inner join wp_', @wp_table_infix, 'term_taxonomy on mt_placement.placement_category_id = wp_', @wp_table_infix, 'term_taxonomy.term_id ',
