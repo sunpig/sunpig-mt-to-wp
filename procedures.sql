@@ -219,12 +219,12 @@ BEGIN
 					') AS CHAR CHARACTER SET latin1 ',
 				') AS BINARY ',
 			'), ',
-			'convert(cast(convert(entry_title using latin1) as binary) using utf8), ',
-			'convert(cast(convert(IFNULL(entry_excerpt, \'\') using latin1) as binary) using utf8), ',
+			'entry_title, ',
+			'IFNULL(entry_excerpt, \'\'), ',
 			'if(entry_status = 2, \'publish\', \'draft\'), ',
 			'if(entry_allow_comments = 1, \'open\', \'closed\'), ',
 			'if(entry_allow_pings = 1, \'open\', \'closed\'),',
-			'convert(cast(convert(replace(entry_basename, \'_\', \'-\') using latin1) as binary) using utf8), ',
+			'replace(entry_basename, \'_\', \'-\'), ',
 			'\'\', ',
 			'\'\', ',
 			'entry_modified_on, ',
@@ -289,10 +289,26 @@ BEGIN
 		' FROM ',
 			' mt_comment ',
 		' WHERE ',
-			' comment_blog_id = ', mt_blog_id, ' ORDER BY comment_id ASC');
+			' comment_blog_id = ', mt_blog_id, 
+			' and comment_junk_status <> -1 ',
+			' and comment_visible = 1 ',
+			' ORDER BY comment_id ASC');
 	PREPARE stmt_copy_comments FROM @str_copy_comments;
 	EXECUTE stmt_copy_comments;
 	DEALLOCATE PREPARE stmt_copy_comments;
+
+	SET @str_update_comment_counts = CONCAT(
+		' update wp_', @wp_table_infix, 'posts p ',
+		' inner join ( ',
+			' select comment_post_id, count(*) as comment_count from wp_', @wp_table_infix, 'comments ',
+			' where comment_approved = 1 ',
+			' group by comment_post_id ',
+		' ) cc on p.id = cc.comment_post_id ',
+		' set p.comment_count = cc.comment_count;');
+	PREPARE stmt_update_comment_counts FROM @str_update_comment_counts;
+	EXECUTE stmt_update_comment_counts;
+	DEALLOCATE PREPARE stmt_update_comment_counts;
+
 END
 //
 

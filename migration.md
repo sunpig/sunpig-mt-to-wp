@@ -64,7 +64,7 @@ Note that the blog database exists already - use the same db for both MT and WP,
 makes copying data between the two easy.
 
 * Grab the latest version of wordpress and uncompress it to /wordpress under sunpig.com
-* Copy wp-config-sample.php to wo-config.php, and edit the file to
+* Copy wp-config-sample.php to wp-config.php, and edit the file to
 	* add database connection details
 	* add security keys, populated with details from https://api.wordpress.org/secret-key/1.1/salt/ 
 * Run the wp installation script by going to http://sunpig.com/wordpress/wp-admin/install.php
@@ -137,6 +137,53 @@ call copy_mt_comments_to_wp_comments(3, 5);
 
 After that, run the commands in `copy-entry-keywords.sql` to copy the key-value
 metadata from the quick reviews blog from mt to wp.
+
+## Create index.php files
+
+For the top-level blog, create an index.php that loads wp:
+
+```
+<?php
+/**
+ * Front to the WordPress application. This file doesn't do anything, but loads
+ * wp-blog-header.php which does and tells WordPress to load the theme.
+ *
+ * @package WordPress
+ */
+
+/**
+ * Tells WordPress to load the WordPress theme and output it.
+ *
+ * @var bool
+ */
+define('WP_USE_THEMES', true);
+
+/** Loads the WordPress Environment and Template */
+require( dirname( __FILE__ ) . '/wordpress/wp-blog-header.php' );
+```
+
+For each other blog, create an index.php that loads wp (note the difference
+in the path on the last line):
+
+```
+<?php
+/**
+ * Front to the WordPress application. This file doesn't do anything, but loads
+ * wp-blog-header.php which does and tells WordPress to load the theme.
+ *
+ * @package WordPress
+ */
+
+/**
+ * Tells WordPress to load the WordPress theme and output it.
+ *
+ * @var bool
+ */
+define('WP_USE_THEMES', true);
+
+/** Loads the WordPress Environment and Template */
+require( dirname( __FILE__ ) . '/../wordpress/wp-blog-header.php' );
+```
 
 
 ## Modify htaccess for redirects
