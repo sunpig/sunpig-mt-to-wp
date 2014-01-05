@@ -195,3 +195,15 @@ main .htaccess file for sunpig so that old links are correctly redirected.
 ## Harden installation
 
 See [http://codex.wordpress.org/Hardening_WordPress](http://codex.wordpress.org/Hardening_WordPress)
+
+
+## Mopping up
+
+*Somehow*, Wordpress fails to set the correct category and tag base rewrite rules for sites
+beyond the second one. I have no idea what it's doing to make this not work, but 
+http://$DOMAIN/$BLOGNAME/category/$CATEGORY_SLUG works for site 2 (/martin), but not 
+for subsequent sites created. This appears to be reproducible in my virtual machine test
+environment, but I haven't put any effort into debugging.
+
+FIX: Go into the settings/permalinks admin page for each blog, and manually enter values
+for category base ("category") and tag base ("tag").
